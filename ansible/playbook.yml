@@ -34,7 +34,7 @@
       when:
         - item.state == 'file'
         - not 'SAMPLE' in item.path
-      notify: Restart OpenAuto
+      notify: Restart display-manager # This restarts OpenAuto.
 
     - name: Create scripts directory
       ansible.builtin.file:
@@ -59,6 +59,22 @@
         label: "{{ item.path }}"
       register: copy_scripts
 
+    - name: Add OpenAuto start menu item
+      ansible.builtin.copy:
+        dest: /home/{{ ansible_user }}/.local/share/applications/OpenAuto.desktop
+        content: |
+          [Desktop Entry]
+          Name=OpenAuto
+          Exec=/home/{{ ansible_user }}/Desktop/openauto
+          Terminal=false
+          Type=Application
+          Categories=Utility;
+          Encoding=UTF-8
+        mode: 0755
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+      notify: Restart display-manager
+
     - name: Install Zero2Go utilities
       ansible.builtin.script: "{{ scripts_dir.path }}/installZero2Go.sh"
       args:
@@ -72,8 +88,7 @@
     - name: Reboot
       ansible.builtin.reboot:
 
-    # Can't actually restart OpenAuto via Ansible. This is the easiest workaround.
-    - name: Restart OpenAuto
+    - name: Restart display-manager
       ansible.builtin.service:
         name: display-manager
         state: restarted
