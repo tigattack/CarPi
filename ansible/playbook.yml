@@ -1,0 +1,79 @@
+---
+- name: OpenAuto Pi Setup
+  hosts: all
+  become: true
+  tasks:
+    - name: Set hostname
+      ansible.builtin.hostname:
+        name: CarPi
+        use: debian
+      notify: Reboot
+
+    - name: Copy OpenAuto configuration
+      ansible.builtin.copy:
+        src: "{{ item.root + item.path }}"
+        dest: /home/pi/.openauto/{{ item.path }}
+        owner: pi
+        group: pi
+        mode: 0644
+        directory_mode: 0755
+      loop: >-
+        {{ lookup('filetree', '../openauto/', wantlist=True) }}
+      loop_control:
+        label: "{{ item.path }}"
+      when:
+        - item.state == 'file'
+        - not 'SAMPLE' in item.path
+      notify: Restart OpenAuto
+
+    - name: Create scripts directory
+      ansible.builtin.file:
+        path: /home/pi/scripts
+        state: directory
+        owner: pi
+        group: pi
+        mode: 0755
+      register: scripts_dir
+
+    - name: Copy scripts
+      ansible.builtin.copy:
+        src: "{{ item.root + item.path }}"
+        dest: "{{ scripts_dir.path }}/{{ item.path }}"
+        owner: pi
+        group: pi
+        mode: 0774
+        directory_mode: 0755
+      loop: >-
+        {{ lookup('filetree', '../scripts/', wantlist=True) }}
+      loop_control:
+        label: "{{ item.path }}"
+      register: copy_scripts
+
+    - name: Install Zero2Go utilities
+      ansible.builtin.script: "{{ scripts_dir.path }}/installZero2Go.sh"
+      args:
+        creates: /home/{{ ansible_user }}/zero2go
+
+    # https://www.waveshare.com/wiki/7inch_HDMI_LCD_(C)#Backlight_Adjustment
+    - name: Install Waveshare RPi-USB-Brightness utility
+      block:
+        - name: Clone RPi-USB-Brightness git repo
+          ansible.builtin.git:
+            repo: https://github.com/waveshare/RPi-USB-Brightness
+            dest: /home/pi/RPi-USB-Brightness
+
+        - name: Run RPi-USB-Brightness install script
+          ansible.builtin.command:
+            cmd: /home/pi/RPi-USB-Brightness/{{ ansible_userspace_bits }}/desktop/install.sh
+            chdir: /home/pi/RPi-USB-Brightness/{{ ansible_userspace_bits }}/desktop
+            creates: /usr/share/applications/USB_Backlight
+
+  handlers:
+    - name: Reboot
+      ansible.builtin.reboot:
+
+    # Can't actually restart OpenAuto via Ansible. This is the easiest workaround.
+    - name: Restart OpenAuto
+      ansible.builtin.service:
+        name: display-manager
+        state: restarted
