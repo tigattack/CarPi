@@ -9,6 +9,16 @@
         use: debian
       notify: Reboot
 
+    - name: Set password
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        password: $6$rounds=656000$zGzJDXD8c6f3Zi23$p4s751WKk3JgCqH4s.f/Em8Ubld3pOUZsrKyOog74oT0Y/YkegG3pnTDwjYCpe.40sLAVXjxXobHj3PezM8C0/
+
+    - name: Install SSH key
+      ansible.posix.authorized_key:
+        user: "{{ ansible_user }}"
+        key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF5Buzvlm9muLrosWs1MfpnecnxzIlSoox1OF8LkRAmD tig@tiga.tech
+
     - name: Copy OpenAuto configuration
       ansible.builtin.copy:
         src: "{{ item.root + item.path }}"
