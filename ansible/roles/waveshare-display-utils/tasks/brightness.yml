@@ -1,0 +1,24 @@
+---
+
+- ansible.builtin.set_fact: # noqa name[missing]
+    brightness_path: /home/{{ ansible_user }}/RPi-USB-Brightness
+
+- name: Clone RPi-USB-Brightness git repository
+  ansible.builtin.git:
+    repo: https://github.com/waveshare/RPi-USB-Brightness
+    dest: "{{ brightness_path }}"
+
+- name: Run RPi-USB-Brightness install script
+  ansible.builtin.command:
+    cmd: "{{ brightness_path }}/{{ ansible_userspace_bits }}/desktop/install.sh"
+    chdir: "{{ brightness_path }}/{{ ansible_userspace_bits }}/desktop"
+    creates: /usr/share/applications/USB_Backlight
+
+- name: Install CLI brightness control binary
+  ansible.builtin.copy:
+    src: "{{ brightness_path }}/{{ ansible_userspace_bits }}/lite/Raspi_USB_Backlight_nogui"
+    remote_src: true
+    dest: /usr/local/bin/brightness
+    mode: 0775
+    owner: root
+    group: root

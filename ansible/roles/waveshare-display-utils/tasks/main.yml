@@ -1,0 +1,9 @@
+---
+
+- name: Install Waveshare RPi-USB-Brightness utility
+  ansible.builtin.include_tasks: brightness.yml
+  tags: brightness
+
+- name: Install Waveshare right-click support
+  ansible.builtin.include_tasks: rightclick.yml
+  tags: rightclick

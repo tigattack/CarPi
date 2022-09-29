@@ -64,19 +64,9 @@
       args:
         creates: /home/{{ ansible_user }}/zero2go
 
-    # https://www.waveshare.com/wiki/7inch_HDMI_LCD_(C)#Backlight_Adjustment
-    - name: Install Waveshare RPi-USB-Brightness utility
-      block:
-        - name: Clone RPi-USB-Brightness git repo
-          ansible.builtin.git:
-            repo: https://github.com/waveshare/RPi-USB-Brightness
-            dest: /home/pi/RPi-USB-Brightness
-
-        - name: Run RPi-USB-Brightness install script
-          ansible.builtin.command:
-            cmd: /home/pi/RPi-USB-Brightness/{{ ansible_userspace_bits }}/desktop/install.sh
-            chdir: /home/pi/RPi-USB-Brightness/{{ ansible_userspace_bits }}/desktop
-            creates: /usr/share/applications/USB_Backlight
+    - name: Install Waveshare display utilities
+      ansible.builtin.include_role:
+        name: waveshare-display-utils
 
   handlers:
     - name: Reboot

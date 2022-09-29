@@ -1,0 +1,92 @@
+---
+
+- name: Install dependencies
+  ansible.builtin.apt:
+    name:
+      - build-essential
+      - libevdev-dev
+      - libevdev2
+    state: present
+
+- name: Download ZIP
+  ansible.builtin.get_url:
+    url: https://www.waveshare.com/w/upload/1/18/Evdev-right-click-emulation.zip
+    dest: /tmp/
+  register: zip_download
+
+- name: Extract ZIP
+  ansible.builtin.unarchive:
+    src: "{{ zip_download.dest }}"
+    remote_src: true
+    dest: /tmp/
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Install binary
+  ansible.builtin.copy:
+    src: "/tmp/evdev-right-click-emulation/out/evdev-rce"
+    remote_src: true
+    dest: /usr/local/bin/
+    mode: 0755
+    owner: root
+    group: root
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Add {{ ansible_user }} to input group
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups:
+      - input
+    append: true
+
+- name: Load uinput kernel module at boot time
+  ansible.builtin.lineinfile:
+    path: /etc/modules
+    line: uinput
+    insertafter: EOF
+    state: present
+
+- name: Configure uinput udev rules
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/99-uinput.rules
+    content: |
+      KERNEL=="uinput", MODE="0660", GROUP="input"
+    mode: 0644
+    owner: root
+    group: root
+  register: udev_rules
+  notify: Reboot
+
+- name: 'udev daemon: reload rules'
+  ansible.builtin.command: udevadm control --reload
+  when: udev_rules is changed
+
+- name: 'udev daemon: request kernel events'
+  ansible.builtin.command: udevadm trigger
+  when: udev_rules is changed
+
+- name: Create autostart directory for user {{ ansible_user }}
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/.config/autostart
+    mode: 0755
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: directory
+  register: autostart_dir
+
+- name: Run right-click support binary on boot
+  ansible.builtin.copy:
+    dest: "{{ autostart_dir.path }}/right_click.desktop"
+    content: |
+      [Desktop Entry]
+      Version=1.0
+      Type=Application
+      Name=evdev-rce
+      GenericName=Enable long-press-to-right-click gesture
+      #If you want to modify the sensitivity, you can modify the size of the two parameters below.
+      Exec=env LONG_CLICK_INTERVAL=500 LONG_CLICK_FUZZ=200  /usr/local/bin/evdev-rce
+      Terminal=true
+      StartupNotify=false
+    mode: 0644
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  notify: Reboot
