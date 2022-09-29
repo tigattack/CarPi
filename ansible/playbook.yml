@@ -22,9 +22,9 @@
     - name: Copy OpenAuto configuration
       ansible.builtin.copy:
         src: "{{ item.root + item.path }}"
-        dest: /home/pi/.openauto/{{ item.path }}
-        owner: pi
-        group: pi
+        dest: /home/{{ ansible_user }}/.openauto/{{ item.path }}
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: 0644
         directory_mode: 0755
       loop: >-
@@ -38,10 +38,10 @@
 
     - name: Create scripts directory
       ansible.builtin.file:
-        path: /home/pi/scripts
+        path: /home/{{ ansible_user }}/scripts
         state: directory
-        owner: pi
-        group: pi
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: 0755
       register: scripts_dir
 
@@ -49,8 +49,8 @@
       ansible.builtin.copy:
         src: "{{ item.root + item.path }}"
         dest: "{{ scripts_dir.path }}/{{ item.path }}"
-        owner: pi
-        group: pi
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
         mode: 0774
         directory_mode: 0755
       loop: >-
