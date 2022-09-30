@@ -26,6 +26,8 @@ This directory contains scripts to be copied to the Pi, once the OS has been ins
 
 ## Kit List
 
+Also see [OpenAuto required hardware](https://bluewavestudio.io/community/thread-2183.html).
+
 | Item                               | Notes                                                                                                                                                                               | Link                                                                                                                                |
 |------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
 | Raspberry Pi 4B 4GB                | [RPiLocator](https://rpilocator.com/) is a great source for finding stock.                                                                                                          | https://thepihut.com/products/raspberry-pi-4-model-b?variant=20064052740158                                                         |
@@ -42,7 +44,3 @@ This directory contains scripts to be copied to the Pi, once the OS has been ins
 | M2.5 5mm screw pack                | To go with the standoffs above.                                                                                                                                                     | https://thepihut.com/products/m2-5-nylon-fixing-packs?variant=41056997081283                                                        |
 | GPIO stacking header               | For HAT stacking.                                                                                                                                                                   | https://thepihut.com/products/gpio-stacking-header-for-pi-a-b-pi-2-pi-3                                                             |
 | JST-XH compatible cable            | For power supply input.                                                                                                                                                             | https://thepihut.com/products/2-5mm-pitch-2-pin-cable-matching-pair-jst-xh-compatible                                               |
-
-#### Resources
-
-[Required hardware list](https://bluewavestudio.io/community/thread-2183.html).
