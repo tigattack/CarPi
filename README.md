@@ -1,5 +1,7 @@
 # tigattack's CarPi Setup
 
+## Contents
+
 ### [ansible](/ansible/)
 
 This directory contains an Ansible playbook to provision the Pi from a stock install of OpenAuto.
@@ -7,8 +9,6 @@ This directory contains an Ansible playbook to provision the Pi from a stock ins
 ### [pi](/pi/)
 
 This directory contains all files to be used on the Pi. See further details in [pi/README.md](pi/README.md).
-
----
 
 ## Kit List
 
