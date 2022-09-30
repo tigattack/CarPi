@@ -28,7 +28,7 @@
         mode: 0644
         directory_mode: 0755
       loop: >-
-        {{ lookup('filetree', '../openauto/', wantlist=True) }}
+        {{ lookup('filetree', '../pi/openauto/', wantlist=True) }}
       loop_control:
         label: "{{ item.path }}"
       when:
@@ -54,7 +54,7 @@
         mode: 0774
         directory_mode: 0755
       loop: >-
-        {{ lookup('filetree', '../scripts/', wantlist=True) }}
+        {{ lookup('filetree', '../pi/scripts/', wantlist=True) }}
       loop_control:
         label: "{{ item.path }}"
       register: copy_scripts
