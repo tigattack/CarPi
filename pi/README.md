@@ -17,3 +17,9 @@ Information regarding OpenAuto system configuration can be found [here](https://
 ### [scripts](scripts/)
 
 This directory contains scripts to be copied to the Pi, once the OS has been installed.
+
+### [splash-animation](splash-animation/)
+
+This directory contains the original splash animation and my custom one.
+
+See more info in [splash-animation/README.md](splash-animation/README.md).

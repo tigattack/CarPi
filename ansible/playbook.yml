@@ -75,6 +75,34 @@
         group: "{{ ansible_user }}"
       notify: Restart display-manager
 
+    - name: Copy custom OpenAuto splash animation
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /usr/share/openautopro
+      loop:
+        - ../pi/splash-animation/audi_splash1.h264
+        - ../pi/splash-animation/audi_splash2.h264
+
+    - name: Create OpenAuto splash systemd unit override directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/openautopro.splash.service.d
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+      register: oap_splash_override_dir
+
+    - name: Install OpenAuto splash systemd unit override
+      ansible.builtin.copy:
+        dest: "{{ oap_splash_override_dir.path }}/override.conf"
+        content: |
+          [Service]
+          Environment="OPENAUTO_SPLASH_VIDEOS=/usr/share/openautopro/audi_splash1.h264:/usr/share/openautopro/audi_splash2.h264"
+        mode: 0644
+        owner: root
+        group: root
+      notify: Reload systemctl daemon
+
     - name: Install Zero2Go utilities
       ansible.builtin.script: "{{ scripts_dir.path }}/installZero2Go.sh"
       args:
@@ -92,3 +120,7 @@
       ansible.builtin.service:
         name: display-manager
         state: restarted
+
+    - name: Reload systemctl daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
