@@ -2,6 +2,9 @@
 - name: OpenAuto Pi Setup
   hosts: all
   become: true
+  vars:
+    ssh_pubkey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF5Buzvlm9muLrosWs1MfpnecnxzIlSoox1OF8LkRAmD tig@tiga.tech
+    password_hash: $6$rounds=656000$zGzJDXD8c6f3Zi23$p4s751WKk3JgCqH4s.f/Em8Ubld3pOUZsrKyOog74oT0Y/YkegG3pnTDwjYCpe.40sLAVXjxXobHj3PezM8C0/
   tasks:
     - name: Set hostname
       ansible.builtin.hostname:
@@ -12,12 +15,12 @@
     - name: Set password
       ansible.builtin.user:
         name: "{{ ansible_user }}"
-        password: $6$rounds=656000$zGzJDXD8c6f3Zi23$p4s751WKk3JgCqH4s.f/Em8Ubld3pOUZsrKyOog74oT0Y/YkegG3pnTDwjYCpe.40sLAVXjxXobHj3PezM8C0/
+        password: "{{ password_hash }}"
 
     - name: Install SSH key
       ansible.posix.authorized_key:
         user: "{{ ansible_user }}"
-        key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF5Buzvlm9muLrosWs1MfpnecnxzIlSoox1OF8LkRAmD tig@tiga.tech
+        key: "{{ ssh_pubkey }}"
 
     - name: Copy OpenAuto configuration
       ansible.builtin.copy:
