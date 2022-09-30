@@ -3,7 +3,7 @@
 - ansible.builtin.set_fact: # noqa name[missing]
     brightness_path: /home/{{ ansible_user }}/RPi-USB-Brightness
 
-- name: Clone RPi-USB-Brightness git repository
+- name: Clone RPi-USB-Brightness git repository # noqa latest[git]
   ansible.builtin.git:
     repo: https://github.com/waveshare/RPi-USB-Brightness
     dest: "{{ brightness_path }}"

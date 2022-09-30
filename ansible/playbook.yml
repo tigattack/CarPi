@@ -62,7 +62,7 @@
         label: "{{ item.path }}"
       register: copy_scripts
 
-    - name: Add OpenAuto start menu item
+    - name: Add OpenAuto start menu item # noqa template-instead-of-copy
       ansible.builtin.copy:
         dest: /home/{{ ansible_user }}/.local/share/applications/OpenAuto.desktop
         content: |
@@ -82,6 +82,9 @@
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /usr/share/openautopro
+        mode: 0644
+        owner: root
+        group: root
       loop:
         - ../pi/splash-animation/audi_splash1.h264
         - ../pi/splash-animation/audi_splash2.h264
@@ -113,7 +116,7 @@
 
     - name: Install Waveshare display utilities
       ansible.builtin.include_role:
-        name: waveshare-display-utils
+        name: waveshare_display_utils
 
   handlers:
     - name: Reboot

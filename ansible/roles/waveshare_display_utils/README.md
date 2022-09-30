@@ -1,4 +1,4 @@
-# Role: waveshare-display-utils
+# Ansible Role waveshare_display_utils
 
 This role installs utilities required for the Waveshare 7-inch HDMI LCD (C).
 
