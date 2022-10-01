@@ -60,7 +60,7 @@
         {{ lookup('filetree', '../pi/scripts/', wantlist=True) }}
       loop_control:
         label: "{{ item.path }}"
-      register: copy_scripts
+      when: item.state == 'file'
 
     - name: Add OpenAuto start menu item # noqa template-instead-of-copy
       ansible.builtin.copy:
