@@ -31,7 +31,7 @@
     group: root
   ignore_errors: "{{ ansible_check_mode }}"
 
-- name: Add {{ ansible_user }} to input group
+- name: Add {{ ansible_user }} to input group # noqa name[template]
   ansible.builtin.user:
     name: "{{ ansible_user }}"
     groups:

@@ -5,7 +5,7 @@
 
 - name: Clone RPi-USB-Brightness git repository # noqa latest[git]
   ansible.builtin.git:
-    repo: https://github.com/waveshare/RPi-USB-Brightness
+    repo: https://github.com/waveshare/RPi-USB-Brightness.git
     dest: "{{ brightness_path }}"
 
 - name: Run RPi-USB-Brightness install script

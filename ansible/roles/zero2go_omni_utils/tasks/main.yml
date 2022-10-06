@@ -10,7 +10,7 @@
   register: zero2go_installer
 
 - name: Install Zero2Go utilities
-  ansible.builtin.shell:
+  ansible.builtin.shell: # noqa command-instead-of-shell
     cmd: "{{ zero2go_installer.dest }}"
     creates: /home/{{ ansible_user }}/zero2go
     chdir: /home/{{ ansible_user }}
