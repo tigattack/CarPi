@@ -32,6 +32,11 @@
   register: validate_rtc
   changed_when: false
 
+- name: Restart timesyncd to ensure system time is up to date
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    state: restarted
+
 - name: Write current system time to RTC
   ansible.builtin.command: hwclock -w
   when: validate_rtc.rc == 0
