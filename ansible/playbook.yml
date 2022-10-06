@@ -83,6 +83,11 @@
         dest: /tmp/openauto-pro-api
       register: oap_api_repo
 
+    - name: Install OAP API requirements
+      ansible.builtin.pip:
+        requirements: /tmp/openauto-pro-api/api_examples/python/requirements.txt
+        state: present
+
     - name: Copy OAP API common libs and assets
       ansible.builtin.copy:
         src: /tmp/openauto-pro-api/api_examples/python/{{ item }}
@@ -102,14 +107,6 @@
         group: "{{ ansible_user }}"
         mode: 0664
         state: touch
-
-    - name: Install Python requirements
-      ansible.builtin.pip:
-        requirements: "{{ item }}"
-        state: present
-      loop:
-        - "{{ scripts_dir.path }}/requirements.txt"
-        - "/tmp/openauto-pro-api/api_examples/python/requirements.txt"
 
     - name: Add OpenAuto start menu item # noqa template-instead-of-copy
       ansible.builtin.copy:
