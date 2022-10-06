@@ -18,7 +18,7 @@
 - name: Fix Zero2Go daemon path
   ansible.builtin.lineinfile:
     path: /etc/init.d/zero2go_daemon
-    regexp: '^(\s*?sudo\s)(\/home\/(\w|\/|\.|-)*?(\/zero2go\/daemon\.sh &))$'
+    regexp: '^(\s*?sudo\s)(\/(\w|\/|\.|-)*?(\/zero2go\/daemon\.sh &))$'
     line: '\1/home/{{ ansible_user }}\4'
     backrefs: true
     state: present
