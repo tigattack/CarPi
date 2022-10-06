@@ -138,6 +138,35 @@
             creates: /home/{{ ansible_user }}/zero2go
             chdir: /home/{{ ansible_user }}
 
+        - name: Fix Zero2Go daemon path
+          ansible.builtin.lineinfile:
+            path: /etc/init.d/zero2go_daemon
+            regexp: '^(\s*?sudo\s)(\/home\/(\w|\/|\.|-)*?(\/zero2go\/daemon\.sh &))$'
+            line: '\1/home/{{ ansible_user }}\4'
+            backrefs: true
+            state: present
+          notify:
+            - Reload systemctl daemon
+            - Restart Zero2Go daemon
+
+        - name: Fix Zero2Go utilities locale
+          ansible.builtin.lineinfile:
+            path: /home/{{ ansible_user }}/zero2go/utilities.sh
+            regexp: '^(export LC_ALL=).*$'
+            line: '\1C'
+            backrefs: true
+            state: present
+          notify: Restart Zero2Go daemon
+
+        - name: Fix Zero2Go daemon script warning
+          ansible.builtin.lineinfile:
+            path: /home/{{ ansible_user }}/zero2go/daemon.sh
+            regexp: '^(pi_model=\$\()cat\s(\/proc\/device-tree\/model\))$'
+            line: \1tr -d '\\0' < \2
+            backrefs: true
+            state: present
+          notify: Restart Zero2Go daemon
+
         - name: Set Zero2Go Omni Preferences
           ansible.builtin.command: >-
             i2cset -y -r {{ zero2go_config.bus }} {{ zero2go_config.address }} {{ item.register }} {{ item.value }}
@@ -159,3 +188,8 @@
     - name: Reload systemctl daemon
       ansible.builtin.systemd:
         daemon_reload: true
+
+    - name: Restart Zero2Go daemon
+      ansible.builtin.systemd:
+        name: zero2go_daemon
+        state: restarted
