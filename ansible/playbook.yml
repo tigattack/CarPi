@@ -164,6 +164,10 @@
       ansible.builtin.include_role:
         name: zero2go_omni_utils
 
+    - name: Configure DS3231 RTC
+      ansible.builtin.include_role:
+        name: rtc_setup
+
   handlers:
     - name: Reboot
       ansible.builtin.reboot:
