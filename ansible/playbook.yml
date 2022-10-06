@@ -5,23 +5,20 @@
   vars:
     ssh_pubkey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF5Buzvlm9muLrosWs1MfpnecnxzIlSoox1OF8LkRAmD tig@tiga.tech
     password_hash: $6$rounds=656000$zGzJDXD8c6f3Zi23$p4s751WKk3JgCqH4s.f/Em8Ubld3pOUZsrKyOog74oT0Y/YkegG3pnTDwjYCpe.40sLAVXjxXobHj3PezM8C0/
-    zero2go_config:
-      bus: 1
-      address: 0x29
-      preferences:
-        - description: State when power connected
-          register: 10
-          value: 1
-        - description: Low voltage threshold (x10)
-          register: 12
-          value: "{{ 11*10 }}"
-        # Max 8 seconds.
-        - description: Power cut delay (x10)
-          register: 14
-          value: "{{ 8*10 }}"
-        - description: Recovery voltage threshold (x10)
-          register: 15
-          value: "{{ 12*10 }}"
+    zero2go_preferences:
+      - description: State when power connected
+        register: 10
+        value: 1
+      - description: Low voltage threshold (x10)
+        register: 12
+        value: "{{ 11*10 }}"
+      # Max 8 seconds.
+      - description: Power cut delay (x10)
+        register: 14
+        value: "{{ 8*10 }}"
+      - description: Recovery voltage threshold (x10)
+        register: 15
+        value: "{{ 12*10 }}"
 
   tasks:
     - name: Set hostname
@@ -132,50 +129,8 @@
         name: waveshare_display_utils
 
     - name: Zero2Go Omni Setup
-      block:
-        - name: Install Zero2Go utilities
-          ansible.builtin.script:
-            cmd: installZero2Go.sh
-            creates: /home/{{ ansible_user }}/zero2go
-            chdir: /home/{{ ansible_user }}
-
-        - name: Fix Zero2Go daemon path
-          ansible.builtin.lineinfile:
-            path: /etc/init.d/zero2go_daemon
-            regexp: '^(\s*?sudo\s)(\/home\/(\w|\/|\.|-)*?(\/zero2go\/daemon\.sh &))$'
-            line: '\1/home/{{ ansible_user }}\4'
-            backrefs: true
-            state: present
-          notify:
-            - Reload systemctl daemon
-            - Restart Zero2Go daemon
-
-        - name: Fix Zero2Go utilities locale
-          ansible.builtin.lineinfile:
-            path: /home/{{ ansible_user }}/zero2go/utilities.sh
-            regexp: '^(export LC_ALL=).*$'
-            line: '\1C'
-            backrefs: true
-            state: present
-          notify: Restart Zero2Go daemon
-
-        - name: Fix Zero2Go daemon script warning
-          ansible.builtin.lineinfile:
-            path: /home/{{ ansible_user }}/zero2go/daemon.sh
-            regexp: '^(pi_model=\$\()cat\s(\/proc\/device-tree\/model\))$'
-            line: \1tr -d '\\0' < \2
-            backrefs: true
-            state: present
-          notify: Restart Zero2Go daemon
-
-        - name: Set Zero2Go Omni Preferences
-          ansible.builtin.command: >-
-            i2cset -y -r {{ zero2go_config.bus }} {{ zero2go_config.address }} {{ item.register }} {{ item.value }}
-          loop: "{{ zero2go_config.preferences }}"
-          loop_control:
-            label: "{{ item.description ~ ' = ' ~ item.value }}"
-          register: zero2go_i2cset
-          failed_when: not 'readback matched' in zero2go_i2cset.stdout
+      ansible.builtin.include_role:
+        name: zero2go_omni_utils
 
   handlers:
     - name: Reboot
@@ -189,8 +144,3 @@
     - name: Reload systemctl daemon
       ansible.builtin.systemd:
         daemon_reload: true
-
-    - name: Restart Zero2Go daemon
-      ansible.builtin.systemd:
-        name: zero2go_daemon
-        state: restarted

@@ -1,0 +1,10 @@
+---
+
+- name: Reload systemctl daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart Zero2Go daemon
+  ansible.builtin.systemd:
+    name: zero2go_daemon
+    state: restarted

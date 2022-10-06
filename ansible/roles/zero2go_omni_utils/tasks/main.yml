@@ -1,0 +1,57 @@
+---
+
+- name: Download Zero2Go utilities install script
+  ansible.builtin.get_url:
+    url: https://github.com/uugear/Zero2Go-Omini/raw/master/Software/installZero2Go.sh
+    dest: /tmp/
+    mode: 0774
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  register: zero2go_installer
+
+- name: Install Zero2Go utilities
+  ansible.builtin.shell:
+    cmd: "{{ zero2go_installer.dest }}"
+    creates: /home/{{ ansible_user }}/zero2go
+    chdir: /home/{{ ansible_user }}
+
+- name: Fix Zero2Go daemon path
+  ansible.builtin.lineinfile:
+    path: /etc/init.d/zero2go_daemon
+    regexp: '^(\s*?sudo\s)(\/home\/(\w|\/|\.|-)*?(\/zero2go\/daemon\.sh &))$'
+    line: '\1/home/{{ ansible_user }}\4'
+    backrefs: true
+    state: present
+  notify:
+    - Reload systemctl daemon
+    - Restart Zero2Go daemon
+
+- name: Fix Zero2Go utilities locale
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user }}/zero2go/utilities.sh
+    regexp: '^(export LC_ALL=).*$'
+    line: '\1C'
+    backrefs: true
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  notify: Restart Zero2Go daemon
+
+- name: Fix Zero2Go daemon script warning
+  ansible.builtin.lineinfile:
+    path: /home/{{ ansible_user }}/zero2go/daemon.sh
+    regexp: '^(pi_model=\$\()cat\s(\/proc\/device-tree\/model\))$'
+    line: \1tr -d '\\0' < \2
+    backrefs: true
+    state: present
+  ignore_errors: "{{ ansible_check_mode }}"
+  notify: Restart Zero2Go daemon
+
+- name: Set Zero2Go Omni Preferences
+  ansible.builtin.command: >-
+    i2cset -y -r {{ zero2go_i2c.bus }} {{ zero2go_i2c.address }} {{ item.register }} {{ item.value }}
+  loop: "{{ zero2go_preferences }}"
+  loop_control:
+    label: "{{ item.description ~ ' = ' ~ item.value }}"
+  when: zero2go_preferences
+  register: zero2go_i2cset
+  failed_when: not 'readback matched' in zero2go_i2cset.stdout

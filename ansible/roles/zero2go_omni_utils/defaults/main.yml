@@ -1,0 +1,12 @@
+---
+
+zero2go_i2c:
+  bus: 1
+  address: 0x29
+
+# == Example ==
+# zero2go_preferences:
+#   - description: State when power connected
+#     register: 10
+#     value: 1
+zero2go_preferences: []
