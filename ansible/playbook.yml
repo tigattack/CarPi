@@ -99,6 +99,7 @@
       loop:
         - common
         - assets
+      ignore_errors: "{{ ansible_check_mode }}"
 
     - name: Touch __init__.py in OAP API common libs dir
       ansible.builtin.file:
