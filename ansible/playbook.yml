@@ -135,7 +135,7 @@
       block:
         - name: Install Zero2Go utilities
           ansible.builtin.script:
-            cmd: ../pi/scripts/installZero2Go.sh
+            cmd: installZero2Go.sh
             creates: /home/{{ ansible_user }}/zero2go
             chdir: /home/{{ ansible_user }}
 
