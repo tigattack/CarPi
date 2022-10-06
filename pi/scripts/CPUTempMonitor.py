@@ -1,18 +1,18 @@
 #
 #  Copyright (C) BlueWave Studio - All Rights Reserved
 #
-#  Modified by Jon LaBass for CPU temperature monitoring
+# Modified by Jon LaBass for CPU temperature monitoring
 # https://bluewavestudio.io/community/thread-3314.html
+# Further modified by tigattack to improve formatting and
+# make fit for use case.
 #
 
 import os
-from gpiozero import CPUTemperature
 import threading
+
 import common.Api_pb2 as oap_api
 from common.Client import Client, ClientEventHandler
-
-# Define the parent directory
-PARENT_DIR = os.path.join(os.path.dirname(__file__), '..')
+from gpiozero import CPUTemperature
 
 # Define cpu threshold (*C)
 CPU_THRESHOLD = 60
@@ -26,34 +26,38 @@ class EventHandler(ClientEventHandler):
         self._timer = None
 
     def on_hello_response(self, client, message):
-        print(
-            "received hello response, result: {}, oap version: {}.{}, api version: {}.{}"
-            .format(message.result, message.oap_version.major,
-                    message.oap_version.minor, message.api_version.major,
-                    message.api_version.minor))
+        print((f"received hello response, result: {message.result}," +
+                f"oap version: {message.oap_version.major}.{message.oap_version.minor}," +
+                f"api version: {message.api_version.major}.{message.api_version.minor}")
+            )
 
         register_notification_channel_request = oap_api.RegisterNotificationChannelRequest(
         )
-        register_notification_channel_request.name = "CPU Temp Notification Channel"
-        register_notification_channel_request.description = "Notification channel for CPU temperature monitoring"
+        register_notification_channel_request.name = "Power Management Notification Channel"
+        register_notification_channel_request.description = (
+            "Notification channel for power management alerts"
+        )
 
         client.send(oap_api.MESSAGE_REGISTER_NOTIFICATION_CHANNEL_REQUEST, 0,
                     register_notification_channel_request.SerializeToString())
 
     def on_register_notification_channel_response(self, client, message):
         print(
-            "register notification channel response, result: {}, icon id: {}".
-            format(message.result, message.id))
+            (f"register notification channel response, result: {message.result}," +
+            f"icon id: {message.id}")
+        )
         self._notification_channel_id = message.id
 
-        if message.result == oap_api.RegisterNotificationChannelResponse.REGISTER_NOTIFICATION_CHANNEL_RESULT_OK:
+        if message.result == (
+                oap_api.RegisterNotificationChannelResponse.REGISTER_NOTIFICATION_CHANNEL_RESULT_OK
+            ):
             print("notification channel successfully registered")
             self.show_notification(client)
 
     def show_notification(self, client):
         cpu_temperature = cpu.temperature
         if cpu_temperature > CPU_THRESHOLD:
-            cpu_temp_format = str(round(cpu_temperature,1))+u'\N{DEGREE SIGN}'+'C'
+            cpu_temp_format = str(round(cpu_temperature,1))+'\N{DEGREE SIGN}'+'C'
             print("sending notification")
 
             show_notification = oap_api.ShowNotification()
@@ -62,10 +66,10 @@ class EventHandler(ClientEventHandler):
             show_notification.description = "CPU temperature is "+cpu_temp_format
             show_notification.single_line = "CPU Temp - "+cpu_temp_format
 
-            with open(PARENT_DIR+"/assets/notification_icon.svg", 'rb') as icon_file:
+            with open("assets/notification_icon.svg", 'rb') as icon_file:
                 show_notification.icon = icon_file.read()
 
-            with open(PARENT_DIR+"/assets/notification_sound.wav", 'rb') as sound_file:
+            with open("assets/notification_sound.wav", 'rb') as sound_file:
                 show_notification.sound_pcm = sound_file.read()
 
             client.send(oap_api.MESSAGE_SHOW_NOTIFICATION, 0,
