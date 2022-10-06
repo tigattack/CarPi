@@ -77,6 +77,11 @@
         label: "{{ item.path }}"
       when: item.state == 'file'
 
+    - name: Install Python requirements
+      ansible.builtin.pip:
+        requirements: "{{ scripts_dir.path }}/requirements.txt"
+        state: present
+
     - name: Add OpenAuto start menu item # noqa template-instead-of-copy
       ansible.builtin.copy:
         dest: /home/{{ ansible_user }}/.local/share/applications/OpenAuto.desktop
