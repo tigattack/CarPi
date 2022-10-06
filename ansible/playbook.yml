@@ -77,10 +77,39 @@
         label: "{{ item.path }}"
       when: item.state == 'file'
 
+    - name: Clone OAP API repository to tmp
+      ansible.builtin.git: # noqa latest[git]
+        repo: https://github.com/bluewave-studio/openauto-pro-api.git
+        dest: /tmp/openauto-pro-api
+      register: oap_api_repo
+
+    - name: Copy OAP API common libs and assets
+      ansible.builtin.copy:
+        src: /tmp/openauto-pro-api/api_examples/python/{{ item }}
+        dest: "{{ scripts_dir.path }}"
+        remote_src: true
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: 0755
+      loop:
+        - common
+        - assets
+
+    - name: Touch __init__.py in OAP API common libs dir
+      ansible.builtin.file:
+        path: "{{ scripts_dir.path }}/common/__init__.py"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: 0664
+        state: touch
+
     - name: Install Python requirements
       ansible.builtin.pip:
-        requirements: "{{ scripts_dir.path }}/requirements.txt"
+        requirements: "{{ item }}"
         state: present
+      loop:
+        - "{{ scripts_dir.path }}/requirements.txt"
+        - "/tmp/openauto-pro-api/api_examples/python/requirements.txt"
 
     - name: Add OpenAuto start menu item # noqa template-instead-of-copy
       ansible.builtin.copy:
