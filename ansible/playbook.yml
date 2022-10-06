@@ -15,9 +15,10 @@
         - description: Low voltage threshold (x10)
           register: 12
           value: "{{ 11*10 }}"
+        # Max 8 seconds.
         - description: Power cut delay (x10)
           register: 14
-          value: "{{ 10*10 }}"
+          value: "{{ 8*10 }}"
         - description: Recovery voltage threshold (x10)
           register: 15
           value: "{{ 12*10 }}"
