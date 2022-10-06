@@ -13,6 +13,7 @@
     cmd: "{{ brightness_path }}/{{ ansible_userspace_bits }}/desktop/install.sh"
     chdir: "{{ brightness_path }}/{{ ansible_userspace_bits }}/desktop"
     creates: /usr/share/applications/USB_Backlight
+  ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Install CLI brightness control binary
   ansible.builtin.copy:
@@ -22,3 +23,9 @@
     mode: 0775
     owner: root
     group: root
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Post-install Cleanup
+  ansible.builtin.file:
+    path: "{{ brightness_path }}"
+    state: absent
