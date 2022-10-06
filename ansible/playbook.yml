@@ -5,6 +5,23 @@
   vars:
     ssh_pubkey: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF5Buzvlm9muLrosWs1MfpnecnxzIlSoox1OF8LkRAmD tig@tiga.tech
     password_hash: $6$rounds=656000$zGzJDXD8c6f3Zi23$p4s751WKk3JgCqH4s.f/Em8Ubld3pOUZsrKyOog74oT0Y/YkegG3pnTDwjYCpe.40sLAVXjxXobHj3PezM8C0/
+    zero2go_config:
+      bus: 1
+      address: 0x29
+      preferences:
+        - description: State when power connected
+          register: 10
+          value: 1
+        - description: Low voltage threshold (x10)
+          register: 12
+          value: "{{ 11*10 }}"
+        - description: Power cut delay (x10)
+          register: 14
+          value: "{{ 10*10 }}"
+        - description: Recovery voltage threshold (x10)
+          register: 15
+          value: "{{ 12*10 }}"
+
   tasks:
     - name: Set hostname
       ansible.builtin.hostname:
@@ -109,14 +126,26 @@
         group: root
       notify: Reload systemctl daemon
 
-    - name: Install Zero2Go utilities
-      ansible.builtin.script: "{{ scripts_dir.path }}/installZero2Go.sh"
-      args:
-        creates: /home/{{ ansible_user }}/zero2go
-
     - name: Install Waveshare display utilities
       ansible.builtin.include_role:
         name: waveshare_display_utils
+
+    - name: Zero2Go Omni Setup
+      block:
+        - name: Install Zero2Go utilities
+          ansible.builtin.script:
+            cmd: ../pi/scripts/installZero2Go.sh
+            creates: /home/{{ ansible_user }}/zero2go
+            chdir: /home/{{ ansible_user }}
+
+        - name: Set Zero2Go Omni Preferences
+          ansible.builtin.command: >-
+            i2cset -y -r {{ zero2go_config.bus }} {{ zero2go_config.address }} {{ item.register }} {{ item.value }}
+          loop: "{{ zero2go_config.preferences }}"
+          loop_control:
+            label: "{{ item.description ~ ' = ' ~ item.value }}"
+          register: zero2go_i2cset
+          failed_when: not 'readback matched' in zero2go_i2cset.stdout
 
   handlers:
     - name: Reboot
