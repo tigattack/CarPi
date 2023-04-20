@@ -28,5 +28,16 @@ hdmi_drive=1
 # Also required for OpenAuto's Android Auto projection
 dtoverlay=vc4-fkms-v3d
 
+# Enable I2C
+dtparam=i2c1=on
+dtparam=i2c_arm=on
+
+# Allow UART and Bluetooth
+dtoverlay=pi3-miniuart-bt
+
+# Required with line above
+# https://github.com/raspberrypi/linux/issues/4123
+core_freq=250
+
 # Disable rainbow boot splash
 disable_splash=1
