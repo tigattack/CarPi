@@ -39,5 +39,14 @@ dtoverlay=pi3-miniuart-bt
 # https://github.com/raspberrypi/linux/issues/4123
 core_freq=250
 
+# Seconds of turbo from boot
+initial_turbo=30
+
+# Disable constant SD card polling
+dtparam=sd_poll_once
+
+# Disable boot delay
+boot_delay=0
+
 # Disable rainbow boot splash
 disable_splash=1
