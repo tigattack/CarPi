@@ -3,11 +3,9 @@
 # Some settings may impact device functionality. See link above for details
 # Additional overlays and parameters are documented /boot/overlays/README
 
-# Enable audio (loads snd_bcm2835)
+# Disable onboard audio and BT (loads snd_bcm2835)
 dtparam=audio=off
 dtoverlay=disable-bt
-disable_splash=1
-dtoverlay=vc4-fkms-v3d
 
 [pi3]
 gpu_mem=256
@@ -26,3 +24,9 @@ hdmi_group=2
 hdmi_mode=87
 hdmi_cvt 1024 600 60 6 0 0 0
 hdmi_drive=1
+# Use fkms display driver
+# Also required for OpenAuto's Android Auto projection
+dtoverlay=vc4-fkms-v3d
+
+# Disable rainbow boot splash
+disable_splash=1
