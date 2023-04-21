@@ -20,7 +20,7 @@
   register: rtc_i2c
 
 # It is possible to load the device without rebooting, but you need to
-# run as root, not just sudo to root, which can't be done with Ansible.
+# run as root, not just sudo to root, which can't be done with Ansible(?? should probably verify this lol).
 - name: Reboot to load device
   ansible.builtin.reboot: # noqa no-handler
   when: >-

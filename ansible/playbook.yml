@@ -156,17 +156,18 @@
         group: root
       notify: Reload systemctl daemon
 
-    - name: Install Waveshare display utilities
+    - name: Include roles
       ansible.builtin.include_role:
-        name: waveshare_display_utils
-
-    - name: Zero2Go Omni Setup
-      ansible.builtin.include_role:
-        name: zero2go_omni_utils
-
-    - name: Configure DS3231 RTC
-      ansible.builtin.include_role:
-        name: rtc_setup
+        name: "{{ item.role }}"
+      loop:
+        - title: Install Waveshare display utilities
+          role: waveshare_hdmi_display_utils
+        - title: Zero2Go Omni Setup
+          role: zero2go_omni_utils
+        - title: Configure DS3231 RTC
+          role: rtc_setup
+      loop_control:
+        label: "{{ item.title }}"
 
   handlers:
     - name: Reboot
