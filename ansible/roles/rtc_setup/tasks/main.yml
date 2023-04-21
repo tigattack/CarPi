@@ -1,31 +1,9 @@
 ---
 
-- name: Load RTC kernel module at boot time
-  ansible.builtin.lineinfile:
-    path: /etc/modules
-    line: rtc-ds1307
-    insertafter: EOF
-    state: present
-  register: rtc_module
-
-- name: Instantiate i2c device at boot time
-  ansible.builtin.blockinfile:
-    path: /etc/rc.local
-    block: |
-      # Instantiate i2c RTC device
-      echo ds1307 0x68 > /sys/class/i2c-adapter/i2c-1/new_device
-    insertbefore: '^exit 0$'
-    marker: "# {mark} ANSIBLE-MANAGED BLOCK (I2C)"
-    state: present
-  register: rtc_i2c
-
-# It is possible to load the device without rebooting, but you need to
-# run as root, not just sudo to root, which can't be done with Ansible(?? should probably verify this lol).
-- name: Reboot to load device
-  ansible.builtin.reboot: # noqa no-handler
-  when: >-
-    rtc_module is changed
-    or rtc_i2c is changed
+- name: Remove fake-hwclock
+  ansible.builtin.apt:
+    name: fake-hwclock
+    state: absent
 
 - name: Validate RTC communication
   ansible.builtin.command: hwclock -r
@@ -40,14 +18,12 @@
 - name: Write current system time to RTC
   ansible.builtin.command: hwclock -w
   when: validate_rtc.rc == 0
+  changed_when: true
 
-- name: Set system time from RTC at boot time
-  ansible.builtin.blockinfile:
-    path: /etc/rc.local
-    block: |
-      # Set system time from RTC
-      sudo hwclock -s
-      date
-    marker: "# {mark} ANSIBLE-MANAGED BLOCK (TIME)"
-    insertbefore: '^exit 0$'
-    state: present
+- name: Copy hwclock-set
+  ansible.builtin.copy:
+    src: hwclock-set
+    dest: /lib/udev/hwclock-set
+    mode: "0755"
+    owner: root
+    group: root
