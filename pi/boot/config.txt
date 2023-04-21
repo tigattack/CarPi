@@ -7,6 +7,9 @@
 dtparam=audio=off
 dtoverlay=disable-bt
 
+# Enable DAC
+dtoverlay=iqaudio-dacplus
+
 [pi3]
 gpu_mem=256
 max_framebuffers=1
