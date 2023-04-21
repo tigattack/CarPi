@@ -1,0 +1,4 @@
+---
+
+driver_repo_path: /tmp/waveshare-dsi-lcd
+install_files_path: "{{ driver_repo_path }}/{{ kernel_version }}/{{ architecture_bits }}"

@@ -1,0 +1,16 @@
+---
+
+# See supported models here https://github.com/waveshare/Waveshare-DSI-LCD
+display_model:
+
+# I2C0 or I2C1
+i2c_bus: I2C0
+
+# See supported versions here https://github.com/waveshare/Waveshare-DSI-LCD
+# Default autodetect from Ansible facts.
+kernel_version: "{{ ansible_kernel[:-5] }}"
+
+# 32 or 64.
+# 64 is not supported for some versions. See support here https://github.com/waveshare/Waveshare-DSI-LCD
+# Default autodetect from Ansible facts.
+architecture_bits: "{{ ansible_userspace_bits }}"

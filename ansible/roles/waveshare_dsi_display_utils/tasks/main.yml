@@ -1,0 +1,19 @@
+---
+
+- name: Clone driver repository
+  ansible.builtin.git:
+    repo: https://github.com/waveshare/Waveshare-DSI-LCD
+    dest: "{{ driver_repo_path }}"
+
+- name: Execute driver install script
+  ansible.builtin.shell:
+    cmd: "{{ install_files_path }}/WS_xinchDSI_MAIN.sh {{ display_model }} {{ i2c_bus }}"
+    chdir: "{{ install_files_path }}"
+    executable: /bin/bash
+  when: display_model | length > 0
+
+- name: Execute backlight control install script
+  ansible.builtin.shell:
+    cmd: "{{ install_files_path }}/Backlight/install.sh"
+    chdir: "{{ install_files_path }}/Backlight"
+    creates: /usr/share/applications/WS_xinchDSI_Backlight_armhf
