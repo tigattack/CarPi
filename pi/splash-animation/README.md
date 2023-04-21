@@ -5,10 +5,7 @@ Just some simple notes here.
 Information on how to swap OpenAuto's splash animation here  
 https://bluewavestudio.io/community/thread-987.html
 
-Sourced an animation from here  
-https://forum.xda-developers.com/t/mod-boot-animations-taking-requests.3351617/
-
-Used this to convert from Android-style boot animation ZIP to MP4  
+Use this to convert from Android-style boot animation ZIP to MP4 if you need  
 https://forum.xda-developers.com/t/tool-win-v1-86b-updated-bootanimation-zip-to-mp4-video-and-converter-porter.2651044/
 
 [original](original/) contains the original OpenAutoPro boot animation. If you wish, this can be converted to MP4 like so:
@@ -17,7 +14,7 @@ https://forum.xda-developers.com/t/tool-win-v1-86b-updated-bootanimation-zip-to-
 for i in {1..2}; do ffmpeg -framerate 24 -i splash${i}.h264 -c copy splash${i}.mp4; done
 ```
 
-Rough conversion process from Android-style boot animation ZIP to OpenAutoPro's expected H264 format:
+Rough conversion process from Android-style boot animation ZIP to OpenAutoPro's expected H264 format below. I'm sure there's an easier way to do this, I just didn't bother trying 👀
 
 * Use 'Boot Animation 2 mp4' (source linked above) to convert to MP4
   * Extract 'Boot Animation 2 mp4' to a directory. We'll call it `ba2mp4`, for the sake of example.
@@ -36,4 +33,19 @@ Rough conversion process from Android-style boot animation ZIP to OpenAutoPro's 
 
 ```bash
 for i in {1..2}; do ffmpeg -i 0${i}_google.mp4 -an -vcodec libx264 -crf 23 custom_splash${i}.h264; done
+```
+
+## My Animation
+
+I sourced an animation from here  
+https://forum.xda-developers.com/t/mod-boot-animations-taking-requests.3351617/ but didn't like it in the end.
+
+I now use a cut of this https://www.youtube.com/shorts/9mE7AAkkdq8
+
+```bash
+yt-dlp https://www.youtube.com/shorts/9mE7AAkkdq8 -f 299 -o "Downloads/audi.%(ext)s"
+ffmpeg -i Downloads/audi.mp4 -filter:v "crop=1024:600" Downloads/audi.mp4
+ffmpeg -to 00:03 -i Downloads/audi.mp4 -c copy Downloads/audi-1.mp4
+ffmpeg -ss 00:03 -i Downloads/audi.mp4 -c copy Downloads/audi-2.mp4
+for i in {1..2}; do ffmpeg -i audi-${i}.mp4 -an -vcodec libx264 -crf 23 audi_splash${i}.h264; done
 ```
